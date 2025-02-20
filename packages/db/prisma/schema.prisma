@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id                  String       @id @default(uuid())
+  email               String       @unique
+  name                String
+  password            String
+  createdAt           DateTime      @default(now())
+
+  administeredRooms   Room[]       @relation("AdminRooms") 
+  rooms               RoomUser[]
+  chats               Chat[]
+}
+
+model Room{
+  id              String        @id @default(uuid())
+  slug            String        @unique
+  createdAt       DateTime      @default(now())
+
+  adminId         String         
+  admin           User          @relation(fields: [adminId],references: [id],name: "AdminRooms")
+  chats           Chat[]
+  users           RoomUser[]
+  mode            RoomMode      @default(PRIVATE)
+}
+
+model Chat{
+  id              String        @id @default(uuid())
+  message         String
+  userId          String
+  roomId          String
+  user            User        @relation(fields: [userId],references: [id])
+  room            Room        @relation(fields: [roomId],references: [id],onDelete: Cascade)
+}
+
+model RoomUser{
+  userId          String
+  roomId          String
+  user            User          @relation(fields: [userId],references: [id],onDelete: Cascade)
+  room            Room          @relation(fields: [roomId], references: [id],onDelete: Cascade)
+  @@id([userId, roomId])
+}
+
+
+enum RoomMode {
+  PRIVATE
+  VIEW_ONLY
+  OPEN
+}
