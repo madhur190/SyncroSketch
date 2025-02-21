@@ -1,102 +1,88 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
-
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+import Card from "../component/ui/Card";
+import ArrowRight from "../component/icons/Arrow-right";
+import GroupIcon from "../component/icons/GroupIcon";
+import PencilIcon from "../component/icons/PencilIcon";
+import ShareIcon from "../component/icons/ShareIcon";
+import Button from "../component/ui/Button";
+import CircleIcon from "../component/ui/CircleIcon";
+import HeaderLandingPage from "../component/ui/HeaderLandingPage";
+import FooterLandingPage from "../component/ui/FooterLandingPage";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turbo.build/repo/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turbo.build?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turbo.build →
-        </a>
-      </footer>
+  return <div className="w-full h-full bg-[#313338]">
+    <HeaderLandingPage/>
+    <div className="flex flex-col items-center justify-center">
+      <div className="text-white text-6xl mt-12">
+        Collaborate and Brainstorm in Real-Time
+      </div>
+      <div className="flex flex-col text-white items-center justify-center text-xl mt-8">
+        <span>
+          Share your ideas instantly with a collaborative whiteboard that brings your 
+        </span>
+        <span>
+          team's creativity together, no matter where they are.
+        </span>
+      </div>
+      <div className="mt-8">
+        <Button size="lg" text="Start Brainstorming" icon={<ArrowRight/>} type="primary"></Button>
+      </div>
     </div>
-  );
+    <div className="flex flex-col items-center justify-center mt-20">
+      <div className="text-white text-5xl mt-12">
+        Everything You Need to Collaborate
+      </div>
+      <div className="flex flex-col text-white items-center justify-center text-xl w-110 text-center mt-8">
+        Powerful features that make brainstorming and ideation seamless for teams of all sizes.
+      </div>
+    </div>
+    <div className="w-full mt-30 flex space-x-40 justify-center p-2">
+      <Card>
+        <div>
+          <CircleIcon icon={<GroupIcon/>}></CircleIcon>
+        </div>
+        <div className="text-white text-xl p-2 text-center">
+          Real-Time Collaboration
+        </div>
+        <div className="text-white text-base p-2 max-w-md mx-auto text-center">
+          Work together with your team in real-time, seeing changes instantly as ideas flow.
+        </div>
+      </Card>
+      <Card>
+        <div>
+          <CircleIcon icon={<ShareIcon/>}></CircleIcon>
+        </div>
+        <div className="text-white text-xl p-2">
+          Easy Sharing
+        </div>
+        <div className="text-white text-base p-2 text-center max-w-md mx-auto">
+          Share your whiteboard with a simple link, no sign-up required for viewers.
+        </div>
+      </Card>
+      <Card>
+        <div>
+          <CircleIcon icon={<PencilIcon/>}></CircleIcon>
+        </div>
+        <div className="text-white text-xl p-2">
+          Intuitive Tools
+        </div> 
+        <div className="text-white text-base p-2 text-center max-w-md mx-auto">
+          Simple yet powerful drawing tools that anyone can use to express their ideas.
+        </div>
+      </Card>
+    </div>
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="text-white text-5xl mt-12">
+        Ready to Start Brainstorming?
+      </div>
+      <div className="flex flex-col text-white items-center justify-center text-xl w-110 text-center mt-8">
+        Join thousands of teams who are already using Syncrosketch to bring their ideas to life.
+      </div>
+      <div className="mt-8">
+        <Button size="lg" text="Get Started" type="primary"></Button>
+      </div>
+    </div>
+    <FooterLandingPage/>
+  </div>
+  
+
 }
