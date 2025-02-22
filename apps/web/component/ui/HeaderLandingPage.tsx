@@ -1,17 +1,13 @@
-import mainLogo from "../assets/favicon.ico"
-import Image from "next/image";
+import Link from "next/link";
 import Button from "./Button";
 
 export default function HeaderLandingPage(){
     return <div className="w-full p-4 flex justify-between pt-6">
         <div className="text-3xl font-medium flex items-center">
-            {/* <span className="p-1">
-                <Image src={mainLogo} alt="SynoSketch"/>
-            </span> */}
             <span className="text-[#4f46e5]">
                 Syno
             </span>
-            <span className="text-white">
+            <span className="text-black">
                 Sketch
             </span>
         </div>

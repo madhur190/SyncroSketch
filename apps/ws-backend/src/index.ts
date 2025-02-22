@@ -22,7 +22,9 @@ const validateUser = (token:string)=>{
 }
 
 wss.on("connection",(socket,request)=>{
-    const token = request.headers["authorization"];
+    const url =new URLSearchParams(request.url?.split('?')[1])
+    const token = url.get("token")||"";
+
     if(!token) return;
     const userId = validateUser(token);
     if(!userId){
