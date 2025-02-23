@@ -1,8 +1,9 @@
-import { Circle, Eraser, Minus, Pencil, Square, Type } from "lucide-react"
+import { Circle, Eraser, Minus, MousePointer, Pencil, Pointer, Square, Type } from "lucide-react"
+import { title } from "process"
 import { ReactNode } from "react"
 
 
-export type Tools = "circle"|"rect"|"text"|"line"|"pencil"|"eraser"
+export type Tools = "circle"|"rect"|"text"|"line"|"pencil"|"eraser"|"selection"
 
 export default function ToolBar({selectedTool,setSelectedTool}:{
     selectedTool:Tools,
@@ -10,33 +11,37 @@ export default function ToolBar({selectedTool,setSelectedTool}:{
 }){
     return <div className="absolute left-1/2 -translate-x-1/2 top-5 rounded-xl px-4 bg-[#232329]
                          text-white flex justify-between py-1 w-96">
-        <Tool activated={selectedTool === "pencil"} Icon={<Pencil/>} onClick={()=>{
+        <Tool title="Selection" activated={selectedTool === "selection"} Icon={<MousePointer/>} onClick={()=>{
+            setSelectedTool("selection")
+        }}></Tool>
+        <Tool title="Pencil" activated={selectedTool === "pencil"} Icon={<Pencil/>} onClick={()=>{
             setSelectedTool("pencil")
         }}></Tool>
-        <Tool activated={selectedTool === "rect"} Icon={<Square/>} onClick={()=>{
+        <Tool title="Rectangle" activated={selectedTool === "rect"} Icon={<Square/>} onClick={()=>{
             setSelectedTool("rect")
         }} ></Tool>
-        <Tool activated={selectedTool === "circle"} Icon={<Circle/>} onClick={()=>{
+        <Tool title="Circle" activated={selectedTool === "circle"} Icon={<Circle/>} onClick={()=>{
             setSelectedTool("circle")
         }}></Tool>
-        <Tool activated={selectedTool === "line"} Icon={<Minus/>} onClick={()=>{
+        <Tool title="Line" activated={selectedTool === "line"} Icon={<Minus/>} onClick={()=>{
             setSelectedTool("line")
         }}></Tool>
-        <Tool activated={selectedTool === "text"} Icon={<Type/>} onClick={()=>{
+        <Tool title="Text" activated={selectedTool === "text"} Icon={<Type/>} onClick={()=>{
             setSelectedTool("text")
         }}></Tool >
-        <Tool activated={selectedTool === "eraser"} Icon={<Eraser/>} onClick={()=>{
+        <Tool title="Eraser" activated={selectedTool === "eraser"} Icon={<Eraser/>} onClick={()=>{
             setSelectedTool("eraser")
         }}></Tool>
     </div>
 }
 
-function Tool({Icon,onClick,activated}:{
+function Tool({Icon,onClick,activated,title}:{
     activated:boolean
     Icon:ReactNode,
-    onClick?:()=>void
+    onClick?:()=>void,
+    title:string
 }){
-    return <div onClick={onClick} className={`p-2 rounded-xl ${activated? "bg-[#403e6a]":"hover:bg-[#31303b]"}`}>
+    return <div onClick={onClick} title={title} className={`p-2 rounded-xl ${activated? "bg-[#403e6a]":"hover:bg-[#31303b]"}`}>
             {Icon}
         </div >
 }

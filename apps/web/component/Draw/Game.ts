@@ -1,14 +1,17 @@
-import { Pencil, Shapes } from "lucide-react"
 import { Tools } from "../ui/ToolBar"
 
 type Shape = {
     type:"rect",
     x:number,
     y:number,
-    width:number,
-    height:number
+    endX:number,
+    endY:number
 }|{
     type:"circle"
+    x:number
+    y:number
+    endX:number
+    endY:number
 }|{
     type:"line",
     startX:number,
@@ -16,9 +19,18 @@ type Shape = {
     endX:number,
     endY:number
 }|{
-    type:"text"
-}|{
+    type:"text" 
+} & inputField|{
     type:"pencil"
+    pencilPoints:{x:number,y:number}[]
+}|{
+    type:"selection"
+}
+
+export type inputField = {
+    text:string
+    x:number
+    y:number
 }
 
 export class Game{
@@ -30,8 +42,11 @@ export class Game{
     clicked:boolean
     existingShapes:Shape[]
     selectedTool:Tools
+    inputBoxes:inputField[]
+    currentPencilPoints:{x:number,y:number}[]
+    setInputBoxes:(boses:inputField[])=>void
 
-    constructor(canvas:HTMLCanvasElement,roomId:string){
+    constructor(canvas:HTMLCanvasElement,roomId:string,inputBoxes:inputField[],setInputBoxes:(boxes:inputField[])=>void){
         this.canvas = canvas
         this.ctx = canvas.getContext("2d")!;
         this.roomId = roomId
@@ -43,20 +58,40 @@ export class Game{
         this.existingShapes = [];
         this.selectedTool = "pencil"
         this.initMouseHandlers();
+        this.setInputBoxes = setInputBoxes
+        this.inputBoxes = inputBoxes
+        this.currentPencilPoints = []
     }
 
     clearCanvas(){
         this.ctx.clearRect(0, 0,this.canvas.width,this.canvas.height);
         this.existingShapes.forEach(Shape=>{
         this.ctx.strokeStyle = "white";
-            if(Shape.type == "rect"){
-                this.ctx.strokeRect(Shape.x,Shape.y,Shape.width,Shape.height);
+            if(Shape.type === "rect"){
+                const width = Shape.endX-Shape.x;
+                const height = Shape.endY-Shape.y;
+                this.ctx.strokeRect(Shape.x,Shape.y,width,height);
             }
-            else if(Shape.type == "line"){
+            else if(Shape.type === "line"){
                 this.ctx.beginPath();
                 this.ctx.moveTo(Shape.startX,Shape.startY)
                 this.ctx.lineTo(Shape.endX,Shape.endY)
                 this.ctx.stroke();
+            }
+            else if(Shape.type === "pencil"){
+                this.ctx.beginPath();
+                if(!Shape.pencilPoints[0]) return;
+                this.ctx.moveTo(Shape.pencilPoints[0]?.x,Shape.pencilPoints[0]?.y);
+                Shape.pencilPoints.forEach(point=>{
+                    this.ctx.lineTo(point.x,point.y);
+                    this.ctx.stroke();
+                })
+                this.ctx.closePath();
+            }
+            else if(Shape.type === "circle"){
+                this.ctx.beginPath();
+                this.ctx.ellipse((Shape.x+Shape.endX)/2,(Shape.y+Shape.endY)/2,Math.abs(Shape.x-Shape.endX)/2,Math.abs(Shape.y-Shape.endY)/2,0,0,2*Math.PI)
+                this.ctx.stroke()
             }
         })
     }
@@ -70,6 +105,14 @@ export class Game{
         const rect = this.canvas.getBoundingClientRect();
         this.startX = e.clientX - rect.left;
         this.startY = e.clientY - rect.top;
+        if(this.selectedTool === "pencil"){
+            this.currentPencilPoints.push({x:this.startX,y:this.startY})
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = "white";
+            this.ctx.moveTo(this.startX,this.startY)
+            this.ctx.stroke();
+            this.ctx.closePath();
+        }
     }
     
     mouseMoveHandler = (e:MouseEvent)=>{
@@ -89,6 +132,46 @@ export class Game{
             this.ctx.lineTo(currentX,currentY)
             this.ctx.stroke();
         }
+        else if(this.selectedTool === "pencil"){
+            if(this.currentPencilPoints.length>0){
+                this.ctx.beginPath();
+                if(!this.currentPencilPoints[0]) return;
+                this.ctx.moveTo(this.currentPencilPoints[0]?.x,this.currentPencilPoints[0]?.y);
+                this.currentPencilPoints.forEach(point=>{
+                    this.ctx.lineTo(point.x,point.y);
+                    this.ctx.stroke();
+                })
+                this.ctx.closePath();
+            }
+            this.currentPencilPoints.push({ x: currentX, y: currentY });
+            this.ctx.beginPath();
+            this.ctx.moveTo(currentX, currentY);
+            this.ctx.lineTo(currentX, currentY);
+            this.ctx.stroke()
+        }
+        else if(this.selectedTool === "circle"){
+            this.ctx.beginPath();
+            this.ctx.ellipse((this.startX+currentX)/2,(this.startY+currentY)/2,Math.abs(this.startX-currentX)/2,Math.abs(this.startY-currentY)/2,0,0,2*Math.PI)
+            this.ctx.stroke()
+        }
+        else if(this.selectedTool === "eraser"){
+            const shape = this.isCollidingShape(currentX,currentY);
+            if(shape){
+                if(shape.type === 'text'){
+                    const toDelete = {
+                        text:shape.text,
+                        x:shape.x,
+                        y:shape.y
+                    };
+                    const updatedBox = this.inputBoxes.filter(s => {
+                        return !(s.x === shape.x && s.y === shape.y && s.text === shape.text);
+                    });
+                    this.inputBoxes = updatedBox;
+                    this.setInputBoxes(updatedBox);
+                }
+                this.existingShapes = this.existingShapes.filter(s => s !== shape);
+            }
+        }
     }
 
     mouseUpHandler = (e:MouseEvent)=>{
@@ -103,8 +186,8 @@ export class Game{
                 type:"rect",
                 x:this.startX,
                 y:this.startY,
-                width:endX - this.startX,
-                height:endY - this.startY
+                endX,
+                endY
             }
         }
         else if(this.selectedTool === "line"){
@@ -114,6 +197,34 @@ export class Game{
                 startY:this.startY,
                 endX:endX,
                 endY:endY
+            }
+        }
+        else if(this.selectedTool === "text"){
+            shape = {
+                type:"text",
+                text:"",
+                x:this.startX,
+                y:this.startY
+            }
+            this.inputBoxes.push({ text: "", x: this.startX, y: this.startY });
+            this.setInputBoxes([...this.inputBoxes]);
+        }
+        else if(this.selectedTool === "pencil"){
+            this.currentPencilPoints.push({ x: endX, y: endY });
+            this.ctx.closePath();
+            shape = {
+                type:"pencil",
+                pencilPoints: [...this.currentPencilPoints]
+            }
+            this.currentPencilPoints = [];
+        }
+        else if(this.selectedTool === "circle"){
+            shape = {
+               type:"circle",
+               x:this.startX,
+               y:this.startY,
+               endX,
+               endY
             }
         }
         if(!shape) return;
@@ -132,4 +243,85 @@ export class Game{
         this.canvas.removeEventListener("mousemove",this.mouseMoveHandler);
         this.canvas.removeEventListener("mouseup",this.mouseUpHandler);
     }
+
+    updateText(box: inputField, value: string) {
+        this.existingShapes.forEach(shape=>{
+            if(shape.type === "text" && shape.x === box.x && shape.y === box.y){
+                shape.text = box.text
+            }
+        })
+        this.clearCanvas();
+    }
+
+    isCollidingShape(xCord:number,yCord:number):Shape|null{
+        const tollerence = 5;
+        for(const Shape of this.existingShapes){
+            if(Shape.type === "rect"){
+                
+                if (
+                    (xCord >= Shape.x - 2 && xCord <= Shape.endX + 2 && 
+                    (Math.abs(yCord - Shape.y) < 2 || Math.abs(yCord - Shape.endY) < 2)) || 
+                    (yCord >= Shape.y - 2 && yCord <= Shape.endY + 2 &&
+                    (Math.abs(xCord - Shape.x) < 2 || Math.abs(xCord - Shape.endX) < 2))
+                ){
+                    return Shape;
+                }
+            }
+            else if(Shape.type === "line"){
+                function linepointNearestMouse(line:{
+                    x0:number,x1:number,y0:number,y1:number
+                }, x:number, y:number) {
+                    const lerp = function(a:number, b:number, x:number) {
+                        return (a + x * (b - a));
+                    };
+                    var dx = line.x1 - line.x0;
+                    var dy = line.y1 - line.y0;
+                    var t = ((x - line.x0) * dx + (y - line.y0) * dy) / (dx * dx + dy * dy);
+                    var lineX = lerp(line.x0, line.x1, t);
+                    var lineY = lerp(line.y0, line.y1, t);
+                    return ({
+                        x: lineX,
+                        y: lineY
+                    });
+                };
+                const linepoint = linepointNearestMouse({x0:Shape.startX,x1:Shape.endX,y0:Shape.startY,y1:Shape.endY}, xCord, yCord);
+                const dx = xCord - linepoint.x;
+                const dy = yCord - linepoint.y;
+                if(Math.abs(Math.sqrt(dx * dx + dy * dy))<tollerence){
+                    return Shape;
+                }
+            }
+            else if(Shape.type === "pencil"){
+                for(const point of Shape.pencilPoints){
+                    if(Math.abs(xCord - point.x) < 5 && Math.abs(yCord - point.y) < 5){
+                        return Shape;
+                    }
+                }
+            }
+            else if(Shape.type === "text"){
+                if(
+                    xCord >= Shape.x - tollerence &&
+                    xCord <= (Shape.x + (Shape.x+this.ctx.measureText(Shape.text).width) + tollerence) &&
+                    Math.abs(yCord - Shape.y) < tollerence
+                ){
+                    return Shape;
+                }
+            }
+            else if(Shape.type === "circle"){
+                const cx = (Shape.x + Shape.endX) / 2;
+                const cy = (Shape.y + Shape.endY) / 2;
+                const radiusX = Math.abs(Shape.endX - Shape.x) / 2;
+                const radiusY = Math.abs(Shape.endY - Shape.y) / 2;
+                const r = (radiusX + radiusY) / 2;
+                const dx = xCord - cx;
+                const dy = yCord - cy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (Math.abs(distance - r) < tollerence) {
+                    return Shape;
+                }
+            }
+        }
+        return null;
+    }
+    
 }
