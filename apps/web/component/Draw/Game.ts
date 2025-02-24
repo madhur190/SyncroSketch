@@ -1,4 +1,5 @@
 import { Tools } from "../ui/ToolBar"
+import GetExistingShapes from "./HttpConnect"
 
 type Shape = {
     type:"rect",
@@ -41,12 +42,39 @@ export class Game{
     startY:number
     clicked:boolean
     existingShapes:Shape[]
+    socket:WebSocket
     selectedTool:Tools
     inputBoxes:inputField[]
     currentPencilPoints:{x:number,y:number}[]
     setInputBoxes:(boses:inputField[])=>void
 
-    constructor(canvas:HTMLCanvasElement,roomId:string,inputBoxes:inputField[],setInputBoxes:(boxes:inputField[])=>void){
+    initHandlers(){
+        this.socket.onmessage =async (event)=>{
+            let rawData: string;
+            if (event.data instanceof Blob) {
+                rawData = await event.data.text();
+            } 
+            else if (typeof event.data === "string") {
+                rawData = event.data;
+            }else {
+                console.error("Received non-JSON data:", event.data);
+                return;
+            }
+            try{
+                const message = JSON.parse(rawData);
+                if(message.type === 'chat'){
+                    const parsedShape = (message.message);
+                    this.existingShapes.push(parsedShape);
+                    this.clearCanvas()
+                }
+            }
+            catch(e){
+                console.error("Failed to parse JSON:", rawData, e);
+            }
+        }
+    }
+
+    constructor(canvas:HTMLCanvasElement,roomId:string,inputBoxes:inputField[],setInputBoxes:(boxes:inputField[])=>void,socket:WebSocket){
         this.canvas = canvas
         this.ctx = canvas.getContext("2d")!;
         this.roomId = roomId
@@ -61,12 +89,29 @@ export class Game{
         this.setInputBoxes = setInputBoxes
         this.inputBoxes = inputBoxes
         this.currentPencilPoints = []
+        this.socket = socket
+        this.init();
+        this.initHandlers();
     }
+
+    async init(){
+        this.existingShapes = await GetExistingShapes(this.roomId);
+        this.clearCanvas();
+        const existingBox:inputField[] = [];
+        this.existingShapes.forEach(x=>{
+            if(!x) return;
+            if(x.type === "text"){
+                existingBox.push(x);
+            }
+        })
+        this.setInputBoxes(existingBox);
+    }   
 
     clearCanvas(){
         this.ctx.clearRect(0, 0,this.canvas.width,this.canvas.height);
         this.existingShapes.forEach(Shape=>{
-        this.ctx.strokeStyle = "white";
+            if (!Shape) return;
+            this.ctx.strokeStyle = "white";
             if(Shape.type === "rect"){
                 const width = Shape.endX-Shape.x;
                 const height = Shape.endY-Shape.y;
@@ -170,6 +215,11 @@ export class Game{
                     this.setInputBoxes(updatedBox);
                 }
                 this.existingShapes = this.existingShapes.filter(s => s !== shape);
+                this.socket.send(JSON.stringify({
+                    type:"delete_chat",
+                    roomId:this.roomId,
+                    message:shape
+                }))
             }
         }
     }
@@ -228,6 +278,13 @@ export class Game{
             }
         }
         if(!shape) return;
+        const message = JSON.stringify({
+            type:"chat",
+            roomId:this.roomId,
+            message:shape
+        })
+        this.socket.send(message);
+
         this.existingShapes.push(shape);
         this.clearCanvas();
     }

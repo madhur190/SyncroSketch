@@ -1,3 +1,4 @@
+"use client"
 import Card from "../component/ui/Card";
 import ArrowRight from "../component/icons/Arrow-right";
 import GroupIcon from "../component/icons/GroupIcon";
@@ -7,8 +8,10 @@ import Button from "../component/ui/Button";
 import CircleIcon from "../component/ui/CircleIcon";
 import HeaderLandingPage from "../component/ui/HeaderLandingPage";
 import FooterLandingPage from "../component/ui/FooterLandingPage";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   return <div className="w-full h-full bg-[white]">
     <HeaderLandingPage/>
     <div className="flex flex-col items-center justify-center">
@@ -24,7 +27,7 @@ export default function Home() {
         </span>
       </div>
       <div className="mt-8">
-        <Button size="lg" text="Start Brainstorming" icon={<ArrowRight/>} type="primary"></Button>
+        <Button size="lg" text="Start Brainstorming" onClick={()=>{router.push("/signin")}} icon={<ArrowRight/>} type="primary"></Button>
       </div>
     </div>
     <div className="flex flex-col items-center justify-center mt-20">
@@ -78,7 +81,7 @@ export default function Home() {
         Join thousands of teams who are already using Syncrosketch to bring their ideas to life.
       </div>
       <div className="mt-8">
-        <Button size="lg" text="Get Started" type="primary"></Button>
+        <Button onClick={()=>{router.push("/signin")}} size="lg" text="Get Started" type="primary"></Button>
       </div>
     </div>
     <FooterLandingPage/>

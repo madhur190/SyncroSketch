@@ -12,7 +12,7 @@ export default function useAuth(){
     const Signin = async (email:string,password:string)=>{
         setLoading(true);
         try {
-            const res = await axios.post(`${HTTP_BACKEND_URL}/signin`, { email, password });
+            const res = await axios.post(`${HTTP_BACKEND_URL}/user/signin`, { email, password });
 
             localStorage.setItem("token", res.data.token);
             setLoading(false);
@@ -26,7 +26,7 @@ export default function useAuth(){
     const Signup = async (name:string,email:string,password:string)=>{
         setLoading(true);
         try {
-            const res = await axios.post(`${HTTP_BACKEND_URL}/signup`, { name, email, password });
+            const res = await axios.post(`${HTTP_BACKEND_URL}/user/signup`, { name, email, password });
 
             localStorage.setItem("token", res.data.token);
             setLoading(false);

@@ -15,7 +15,7 @@ interface ButtonProps{
 
 const varientStyle:Record<varient,string> = {
     "primary":"bg-[#a8a5ff] hover:bg-[#b2aeff]",
-    "secondary":"bg-[#232329] text-white hover:bg-[#31303b]"
+    "secondary":"bg-slate-500 text-white hover:bg-[#31303b]"
 }
 
 const sizeStyle:Record<size,string> = {

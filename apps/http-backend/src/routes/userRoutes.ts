@@ -101,11 +101,19 @@ userRouter.get("/me",auth,async(req,res)=>{
         where:{
             id:userId
         },include:{
-            administeredRooms:true,
+            administeredRooms:{
+                select:{
+                    slug:true,
+                    id:true
+                }
+            },
             rooms:{
                 include:{
                     room:{
-                        include:{admin:true}
+                        select:{
+                            slug:true,
+                            id:true
+                        }
                     }
                 }
             }

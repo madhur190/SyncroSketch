@@ -7,7 +7,7 @@ type CircleIconProps = {
 
 export default function CircleIcon({text,icon}:CircleIconProps){
     return <div className="bg-[#e0e7ff] rounded-full w-15 h-15 flex items-center justify-center">
-        <div className="flex items-center justify-center text-3xl">
+        <div className="flex items-center justify-center text-3xl text-[#4f46e5] font-semibold">
             {text && text}
             {icon &&
              <span>

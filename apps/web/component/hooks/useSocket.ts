@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 
 export default function useSocket(){
-    const socketRef = useRef<WebSocket>(null);
+    const [socket,setSocket] = useState<WebSocket>();
     const [loading,setLoading] = useState(false);
     const router = useRouter();
     useEffect(()=>{
@@ -15,10 +15,11 @@ export default function useSocket(){
             router.push("/signin");
             return;
         }
-        socketRef.current = new WebSocket(`${WS_BACKEND_ULR}?token=${token}`);
-        socketRef.current.onopen = ()=>{
+        const ws = new WebSocket(`${WS_BACKEND_ULR}?token=${token}`);
+        ws.onopen = ()=>{
             setLoading(false)
+            setSocket(ws);
         }
     },[])
-    return {socketRef,loading};
+    return {socket,loading};
 }

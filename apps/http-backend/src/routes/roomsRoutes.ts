@@ -9,7 +9,7 @@ RoomsRouter.post("/create",auth,async(req,res)=>{
     const parsedData = createRoomSchema.safeParse(req.body);
     if(!parsedData.success){
         res.status(400).json({
-            error:parsedData.error,
+            error:parsedData.error, 
             message:"Incorrect inputs"
         })
         return;
@@ -33,20 +33,14 @@ RoomsRouter.post("/create",auth,async(req,res)=>{
         })
     }
     catch(error:any){
-        if (error.code === "P2002") {
-            res.status(400).json({
-                message: "Room slug is already taken. Please choose another one."
-            });
-        } else {
-            res.status(500).json({
-                message: "Something went wrong",
-                error: error.message
-            });
-        }
+        res.status(500).json({
+            message: "Something went wrong",
+            error: error.message
+        });
     }
 })
 
-RoomsRouter.get("/chats:roomId",async(req,res)=>{
+RoomsRouter.get("/chats/:roomId",async(req,res)=>{
     const roomId = req.params.roomId;
     const existingChats = await client.chat.findMany({
         where:{
