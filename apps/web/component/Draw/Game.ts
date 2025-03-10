@@ -284,7 +284,6 @@ export class Game{
             message:shape
         })
         this.socket.send(message);
-
         this.existingShapes.push(shape);
         this.clearCanvas();
     }

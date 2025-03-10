@@ -12,7 +12,7 @@ export default function Canva({roomId}:{
     roomId:string
 }){
     const [copied,setCopied] = useState(false);
-    const [share,setShare] = useState(true);
+    const [share,setShare] = useState(false);
     const [selectedTool,setSelectedTool] = useState<Tools>("selection");
     const [game,setGame] = useState<Game|null>();
     const [inputboxes,setInputBoxes] = useState<inputField[]>([])

@@ -40,7 +40,7 @@ wss.on("connection",(socket,request)=>{
         socket.on("message",async (data)=>{
             let parsedData;
             if(typeof data !== "string"){
-                parsedData = JSON.parse(JSON.stringify(data));
+                parsedData = JSON.parse(data.toString());
             }else{
                 parsedData = JSON.parse(data);
             }
@@ -59,19 +59,18 @@ wss.on("connection",(socket,request)=>{
                 const message = parsedData.message;
 
                 const stringMessage = JSON.stringify(message);
-
                 await client.chat.create({
                     data:{
                         message:stringMessage,
                         roomId,
                         userId
                     }
-                })
+                });
                 currentUsers.forEach(user=>{
                     if(user.rooms.includes(roomId) && user.socket != socket){
                         user.socket.send(JSON.stringify({
                             type:"chat",
-                            message:stringMessage,
+                            message:message,
                             roomId
                         }));
                     }
