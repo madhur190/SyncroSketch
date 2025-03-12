@@ -1,17 +1,9 @@
-"use-client"
-
 import Canva from "../../../component/ui/Canva";
 
-interface RoomProps {
-    params: {
-      roomId: string;
-    };
-}
-
-export default async function Room({params}:RoomProps){
-    const roomId = (await params).roomId;
-    
+export default async function Room({params}:{
+    params:Promise<{ roomId: string }>
+}){    
     return<div>
-        <Canva roomId={roomId} />
+        <Canva roomId={(await params).roomId} />
     </div>
 }
