@@ -1,4 +1,0 @@
-{
-    "buildCommand": "pnpm run build",
-    "installCommand": "pnpm install --filter=http-backend --filter=ws-backend --filter=frontend"
-}
