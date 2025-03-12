@@ -6,4 +6,4 @@ export default async function Room({params}:{
     return<div>
         <Canva roomId={(await params).roomId} />
     </div>
-}
+} 
